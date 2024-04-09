@@ -6,10 +6,8 @@ from rest_framework import (
     mixins,
     pagination,
     permissions,
-    status,
     viewsets,
 )
-from rest_framework.response import Response
 
 from posts.models import Comment, Follow, Group, Post
 from .mixins import ActionPermissionsMixin
@@ -58,34 +56,5 @@ class FollowViewSet(
     def get_queryset(self):
         return Follow.objects.filter(user=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        following_username = request.data.get('following')
-
-        if following_username == request.user.username:
-            return Response(
-                data=settings.CANT_FOLLOW_YOURSELF,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if Follow.objects.filter(
-            user=request.user,
-            following__username=following_username,
-        ).exists():
-            return Response(
-                data=settings.ALREADY_FOLLOW,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        following = get_object_or_404(User, username=following_username)
-        Follow.objects.create(user=request.user, following=following)
-
-        return Response(
-            data={
-                'user': request.user.username,
-                'following': following_username,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
