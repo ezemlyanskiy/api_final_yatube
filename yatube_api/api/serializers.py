@@ -1,24 +1,18 @@
-import base64
-
-from django.core.files.base import ContentFile
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from posts.models import Comment, Follow, Group, Post
-from .utils import get_common_slug
+from .fields import Base64ImageField
+
+User = get_user_model()
 
 
 class AuthorFieldSerializer(serializers.Serializer):
-    author = get_common_slug()
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+    )
 
 
 class PostSerializer(AuthorFieldSerializer, serializers.ModelSerializer):
@@ -44,9 +38,22 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    user = get_common_slug()
-    following = get_common_slug(read_only=False)
+    user = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+    )
+    following = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+    )
 
     class Meta:
         model = Follow
         fields = ('user', 'following')
+
+    def validate_following(self, value):
+        if not User.objects.filter(username=value).exists():
+            raise serializers.ValidationError()
+
+        return value

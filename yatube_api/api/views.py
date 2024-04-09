@@ -64,12 +64,9 @@ class FollowViewSet(
 
         following_username = request.data.get('following')
 
-        if not User.objects.filter(username=following_username).exists():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
         if following_username == request.user.username:
             return Response(
-                data='Нельзя подписаться на самого себя',
+                data=settings.CANT_FOLLOW_YOURSELF,
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -78,7 +75,7 @@ class FollowViewSet(
             following__username=following_username,
         ).exists():
             return Response(
-                data='Вы уже подписаны на этого пользователя',
+                data=settings.ALREADY_FOLLOW,
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

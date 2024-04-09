@@ -119,3 +119,6 @@ SIMPLE_JWT = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MAX_LIMIT = 20
+
+CANT_FOLLOW_YOURSELF = 'Нельзя подписаться на самого себя'
+ALREADY_FOLLOW = 'Вы уже подписаны на этого пользователя'

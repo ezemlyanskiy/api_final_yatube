@@ -17,6 +17,3 @@ class ActionPermissionsMixin:
 
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
-
-    def perform_destroy(self, instance):
-        instance.delete()

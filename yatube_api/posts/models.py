@@ -33,9 +33,16 @@ class Group(models.Model):
 
 
 class Follow(models.Model):
-    following = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='following_set'
-    )
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='user_set'
     )
+    following = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='following_set'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'], name='unique_user_following'
+            )
+        ]
