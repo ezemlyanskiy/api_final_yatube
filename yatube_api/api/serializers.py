@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 
 from posts.models import Comment, Follow, Group, Post
@@ -55,10 +54,9 @@ class FollowSerializer(serializers.ModelSerializer):
         fields = ('user', 'following')
 
     def validate_following(self, value):
-        followee = get_object_or_404(User, pk=value.pk)
         follower_username = self.context.get('request').user.username
 
-        if followee.username == follower_username:
+        if value.username == follower_username:
             raise serializers.ValidationError(
                 settings.CANT_FOLLOW_YOURSELF,
                 status.HTTP_400_BAD_REQUEST,
@@ -66,7 +64,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
         if Follow.objects.filter(
             user__username=follower_username,
-            following__username=followee.username,
+            following__username=value.username,
         ).exists():
             raise serializers.ValidationError(
                 settings.ALREADY_FOLLOW,
