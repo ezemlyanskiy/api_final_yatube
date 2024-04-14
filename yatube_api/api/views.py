@@ -29,7 +29,7 @@ class PostViewSet(ActionPermissionsMixin, viewsets.ModelViewSet):
 
 
 class CommentViewSet(ActionPermissionsMixin, viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    # queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
     def get_queryset(self):
